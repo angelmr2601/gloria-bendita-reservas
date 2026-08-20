@@ -168,7 +168,7 @@ select:focus, input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rg
 .day-title b { font-family: Georgia, serif; font-size: 19px; font-weight: 400; }
 .day-title small { color: #837c70; }
 .day-title > button { border: 1px solid var(--green); background: transparent; color: var(--green); padding: 9px 16px; cursor: pointer; }
-.appointments-panel, .availability-panel { background: white; border: 1px solid var(--line); padding: clamp(20px, 3vw, 32px); box-shadow: 0 10px 35px rgba(52,44,31,.05); }
+.appointments-panel, .availability-panel, .closures-panel { background: white; border: 1px solid var(--line); padding: clamp(20px, 3vw, 32px); box-shadow: 0 10px 35px rgba(52,44,31,.05); }
 .appointments-panel h2, .panel-heading h2 { font-family: Georgia, serif; font-size: 27px; font-weight: 400; margin: 0 0 22px; }
 .appointment-list { display: flex; flex-direction: column; }
 .appointment-card { display: grid; grid-template-columns: 75px 1fr auto; align-items: center; gap: 18px; padding: 20px 0; border-top: 1px solid #e7e0d3; }
@@ -183,7 +183,7 @@ select:focus, input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rg
 .appointment-actions .danger { color: #9a3e2b; border-color: #ddb9ae; }
 .empty-state { color: #817a6f; padding: 25px 0; text-align: center; }
 .dashboard-error { color: #8d3528; background: #f6dfd8; padding: 13px 16px; margin-bottom: 18px; font-size: 12px; }
-.availability-panel, .services-panel { margin-top: 28px; scroll-margin-top: 25px; }
+.availability-panel, .services-panel, .closures-panel { margin-top: 28px; scroll-margin-top: 25px; }
 .services-panel { background: white; border: 1px solid var(--line); padding: clamp(20px, 3vw, 32px); box-shadow: 0 10px 35px rgba(52,44,31,.05); }
 .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .price-grid article { border: 1px solid var(--line); background: #fbfaf5; padding: 17px; display: flex; flex-direction: column; gap: 18px; }
@@ -195,6 +195,16 @@ select:focus, input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rg
 .price-grid input { padding: 11px; min-width: 0; }
 .price-grid label span { background: var(--green-soft); padding: 12px; }
 .price-grid button { border: 0; background: var(--green); color: white; padding: 11px; cursor: pointer; }
+.closure-controls { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(240px, 1.4fr) auto; align-items: center; gap: 12px; padding: 18px; background: #fbfaf5; border: 1px solid var(--line); }
+.closure-controls select { padding: 12px; background: white; border: 1px solid var(--line); }
+.closure-controls strong { font-family: Georgia, serif; font-size: 17px; font-weight: 400; }
+.closure-controls button, .closure-list button { border: 0; background: #8d3528; color: white; padding: 12px 17px; cursor: pointer; }
+.closure-list { margin-top: 24px; display: flex; flex-direction: column; gap: 9px; }
+.closure-list h3 { font-family: Georgia, serif; font-size: 19px; font-weight: 400; margin: 0 0 4px; }
+.closure-list article { border: 1px solid var(--line); padding: 13px 15px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.closure-list article div { display: flex; flex-direction: column; gap: 4px; }
+.closure-list article span { color: #817a6f; font-size: 11px; text-transform: capitalize; }
+.closure-list button { background: var(--green); padding: 9px 12px; }
 .panel-heading { display: flex; justify-content: space-between; gap: 25px; align-items: flex-end; margin-bottom: 27px; }
 .panel-heading h2 { margin-bottom: 6px; }
 .panel-heading > div:first-child > span { font-size: 11px; color: #817a6f; }
@@ -250,6 +260,8 @@ select:focus, input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rg
   .dashboard-content { padding: 28px 18px 55px; }
   .availability-grid { grid-template-columns: repeat(3, 1fr); }
   .price-grid { grid-template-columns: 1fr; }
+  .closure-controls { grid-template-columns: 1fr; }
+  .closure-list article { align-items: stretch; flex-direction: column; }
 }
 @media (max-width: 650px) {
   .dashboard-header, .panel-heading { align-items: stretch; flex-direction: column; }

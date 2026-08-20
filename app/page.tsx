@@ -36,6 +36,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [managementUrl, setManagementUrl] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const [dateBlocked, setDateBlocked] = useState(false);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function Home() {
     if (!barber || !service || !date) return;
     let active = true;
     fetch(`/api/reservations?barber=${encodeURIComponent(barber)}&service=${encodeURIComponent(service)}&date=${encodeURIComponent(date)}`)
-      .then((response) => response.json()).then((data) => { if (active) { setBookedTimes(data.bookedTimes ?? []); setActiveTimes(data.activeTimes ?? DEFAULT_TIMES); } })
+      .then((response) => response.json()).then((data) => { if (active) { setBookedTimes(data.bookedTimes ?? []); setActiveTimes(data.activeTimes ?? DEFAULT_TIMES); setDateBlocked(Boolean(data.blocked)); } })
       .catch(() => active && setBookedTimes([])).finally(() => active && setLoadingTimes(false));
     return () => { active = false; };
   }, [barber, service, date]);
@@ -89,8 +90,8 @@ export default function Home() {
             <div className="barber-grid">{barbers.map((item) => <button className={`barber-card ${barber === item.id ? "selected" : ""}`} key={item.id} onClick={() => { setBarber(item.id); setService(""); setServices([]); setDate(""); setTime(""); setBookedTimes([]); }} type="button"><span className="avatar">{item.initials}</span><span className="barber-info"><b>{item.name}</b><small>{item.specialty}</small><small className="schedule">{item.schedule}</small></span><span className="radio">{barber === item.id ? "✓" : ""}</span></button>)}</div>
           </div>
           <div className={`form-block ${!barber ? "muted" : ""}`}><div className="block-title"><span>02</span><div><h3>Elige el servicio</h3><p>Precio y duración con {selectedBarber?.name ?? "tu peluquero"}</p></div></div><div className="service-grid">{services.map((item) => <button type="button" key={item.code} className={service === item.code ? "selected" : ""} onClick={() => { setService(item.code); setDate(""); setTime(""); }} disabled={!barber}><span><b>{item.name}</b><small>{item.durationMinutes} min</small></span><strong>{(item.priceCents / 100).toFixed(2).replace(".00", "").replace(".", ",")} €</strong></button>)}</div></div>
-          <div className={`form-block ${!service ? "muted" : ""}`}><div className="block-title"><span>03</span><div><h3>Elige el día</h3><p>Próximas fechas disponibles</p></div></div><label className="select-label">FECHA<select value={date} onChange={(event) => { setDate(event.target.value); setTime(""); setBookedTimes([]); setLoadingTimes(Boolean(event.target.value)); }} disabled={!service}><option value="">Selecciona una fecha</option>{dates.map((item) => <option value={item.value} key={item.value}>{item.label}</option>)}</select></label></div>
-          <div className={`form-block ${!date ? "muted" : ""}`}><div className="block-title"><span>04</span><div><h3>Elige la hora</h3><p>{date ? `Disponibilidad para el ${longDate(date)}` : "Selecciona antes una fecha"}</p></div></div><div className="time-grid">{loadingTimes ? <p className="loading">Consultando disponibilidad…</p> : availableTimes.map((item) => <button type="button" className={time === item ? "selected" : ""} onClick={() => setTime(item)} disabled={!date} key={item}>{item}</button>)}</div></div>
+          <div className={`form-block ${!service ? "muted" : ""}`}><div className="block-title"><span>03</span><div><h3>Elige el día</h3><p>Próximas fechas disponibles</p></div></div><label className="select-label">FECHA<select value={date} onChange={(event) => { setDate(event.target.value); setTime(""); setBookedTimes([]); setDateBlocked(false); setLoadingTimes(Boolean(event.target.value)); }} disabled={!service}><option value="">Selecciona una fecha</option>{dates.map((item) => <option value={item.value} key={item.value}>{item.label}</option>)}</select></label></div>
+          <div className={`form-block ${!date ? "muted" : ""}`}><div className="block-title"><span>04</span><div><h3>Elige la hora</h3><p>{date ? `Disponibilidad para el ${longDate(date)}` : "Selecciona antes una fecha"}</p></div></div><div className="time-grid">{loadingTimes ? <p className="loading">Consultando disponibilidad…</p> : dateBlocked ? <p className="loading">El peluquero no acepta reservas durante esta fecha.</p> : availableTimes.length === 0 && date ? <p className="loading">No quedan horas disponibles para este día.</p> : availableTimes.map((item) => <button type="button" className={time === item ? "selected" : ""} onClick={() => setTime(item)} disabled={!date} key={item}>{item}</button>)}</div></div>
           <button className="submit-button" disabled={!barber || !service || !date || !time} onClick={continueToDetails}>CONTINUAR <span>→</span></button>
         </>}
         {step === "details" && <form onSubmit={submitReservation} className="details-form">

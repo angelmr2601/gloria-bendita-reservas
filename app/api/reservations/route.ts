@@ -11,15 +11,17 @@ const shortTime = (value: string) => value.slice(0, 5);
 
 async function availability(barber: string, date: string, duration: number) {
   const db = createSupabaseAdminClient();
-  const [bookedResult, overrideResult] = await Promise.all([
+  const [bookedResult, overrideResult, blockResult] = await Promise.all([
     db.from("reservations").select("appointment_time, service_duration").eq("barber_id", barber).eq("appointment_date", date).eq("status", "confirmed"),
     db.from("availability_overrides").select("appointment_time, enabled").eq("barber_id", barber).eq("appointment_date", date),
+    db.from("availability_blocks").select("id").eq("barber_id", barber).lte("start_date", date).gte("end_date", date).limit(1),
   ]);
-  if (bookedResult.error) throw bookedResult.error; if (overrideResult.error) throw overrideResult.error;
+  if (bookedResult.error) throw bookedResult.error; if (overrideResult.error) throw overrideResult.error; if (blockResult.error) throw blockResult.error;
+  if ((blockResult.data ?? []).length > 0) return { bookedTimes: [], activeTimes: [], blocked: true };
   const booked = (bookedResult.data ?? []).map((row) => ({ time: shortTime(row.appointment_time), duration: row.service_duration ?? 30 }));
   const active = new Set(DEFAULT_TIMES);
   for (const row of overrideResult.data ?? []) { const time = shortTime(row.appointment_time); if (row.enabled) active.add(time); else active.delete(time); }
-  return { bookedTimes: booked.map((row) => row.time), activeTimes: [...active].filter((candidate) => !booked.some((row) => intervalsOverlap(timeToMinutes(candidate), duration, timeToMinutes(row.time), row.duration))).sort() };
+  return { bookedTimes: booked.map((row) => row.time), activeTimes: [...active].filter((candidate) => !booked.some((row) => intervalsOverlap(timeToMinutes(candidate), duration, timeToMinutes(row.time), row.duration))).sort(), blocked: false };
 }
 
 export async function GET(request: Request) {
