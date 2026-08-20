@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 
 type Appointment = { id: number; appointmentDate: string; appointmentTime: string; serviceName: string | null; serviceDuration: number | null; priceCents: number | null; customerName: string; customerPhone: string; customerEmail: string };
 type Service = { code: string; name: string; durationMinutes: number; priceCents: number };
@@ -10,7 +12,8 @@ type DashboardData = { appointments: Appointment[]; activeTimes: string[]; defau
 function localISO(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
 function prettyDate(value: string) { return new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" }).format(new Date(`${value}T12:00:00`)); }
 
-export default function BarberDashboard({ barber, signOutPath }: { barber: Barber; signOutPath: string }) {
+export default function BarberDashboard({ barber }: { barber: Barber }) {
+  const router = useRouter();
   const [date, setDate] = useState(localISO());
   const [data, setData] = useState<DashboardData>({ appointments: [], activeTimes: [], defaultTimes: [], services: [] });
   const [loading, setLoading] = useState(true);
@@ -48,13 +51,14 @@ export default function BarberDashboard({ barber, signOutPath }: { barber: Barbe
   async function toggle(time: string) { if (occupied.has(time) && data.activeTimes.includes(time)) { setError("No puedes quitar una hora que ya tiene una cita reservada."); return; } await mutate({ action: "availability", date, time, enabled: !data.activeTimes.includes(time) }); }
   async function addTime() { if (!customTime) return; if (await mutate({ action: "availability", date, time: customTime, enabled: true })) setCustomTime(""); }
   async function updatePrice(service: Service, value: string) { const price = Number(value.replace(",", ".")); if (!Number.isFinite(price) || price < 0) { setError("Introduce un precio válido."); return; } await mutate({ action: "service_price", code: service.code, priceCents: Math.round(price * 100) }); }
+  async function signOut() { await createSupabaseBrowserClient().auth.signOut(); router.refresh(); }
 
   return <main className="dashboard-page">
     <aside className="dashboard-side">
       <div className="dashboard-brand"><div className="andalusian-star"><i /><i /></div><div><b>GLORIA BENDITA</b><span>Zona de peluqueros</span></div></div>
       <nav><button className="active">Agenda</button><button onClick={() => document.getElementById("servicios")?.scrollIntoView({ behavior: "smooth" })}>Servicios y precios</button><button onClick={() => document.getElementById("horarios")?.scrollIntoView({ behavior: "smooth" })}>Disponibilidad</button></nav>
       <div className="barber-session"><span>{barber.name.split(" ").map((part) => part[0]).join("")}</span><div><b>{barber.name}</b><small>{barber.email}</small></div></div>
-      <a className="sign-out" href={signOutPath}>Cerrar sesión</a>
+      <button className="sign-out" onClick={signOut}>Cerrar sesión</button>
     </aside>
     <section className="dashboard-content">
       <header className="dashboard-header"><div><p>MI AGENDA</p><h1>Buenos días, {barber.name.split(" ")[0]}</h1></div><label>FECHA<input type="date" value={date} onChange={(event) => { setLoading(true); setError(""); setDate(event.target.value); }} /></label></header>

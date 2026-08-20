@@ -1,6 +1,4 @@
-import { and, eq } from "drizzle-orm";
-import { getDb } from "../db";
-import { barberServices } from "../db/schema";
+import { createSupabaseAdminClient } from "./supabase/admin";
 
 export const DEFAULT_SERVICES = [
   { code: "corte", name: "Corte", durationMinutes: 45, priceCents: 1000 },
@@ -9,11 +7,9 @@ export const DEFAULT_SERVICES = [
 ] as const;
 
 export async function getBarberServices(barber: string) {
-  const db = getDb();
-  for (const service of DEFAULT_SERVICES) {
-    await db.insert(barberServices).values({ barber, ...service, enabled: true }).onConflictDoNothing({ target: [barberServices.barber, barberServices.code] });
-  }
-  return db.select().from(barberServices).where(and(eq(barberServices.barber, barber), eq(barberServices.enabled, true)));
+  const { data, error } = await createSupabaseAdminClient().from("barber_services").select("code, name, duration_minutes, price_cents").eq("barber_id", barber).eq("enabled", true).order("id");
+  if (error) throw error;
+  return (data ?? []).map((row) => ({ code: row.code, name: row.name, durationMinutes: row.duration_minutes, priceCents: row.price_cents }));
 }
 
 export function timeToMinutes(value: string) { const [hours, minutes] = value.split(":").map(Number); return hours * 60 + minutes; }

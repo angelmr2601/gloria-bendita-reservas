@@ -119,6 +119,20 @@ select:focus, input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rg
   .tile-corner { display: none; }
 }
 
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #f4efe4; color: #273b32; }
+.auth-card { width: min(440px, 100%); padding: 42px; border: 1px solid #d6c8aa; background: #fffdf7; box-shadow: 0 18px 55px rgba(39, 59, 50, .12); text-align: center; }
+.auth-card > p { margin: 18px 0 5px; color: #a06a26; font-size: 12px; font-weight: 800; letter-spacing: .18em; }
+.auth-card h1 { margin: 0 0 28px; font-family: Georgia, serif; font-size: clamp(28px, 5vw, 38px); }
+.auth-card form { display: grid; gap: 18px; text-align: left; }
+.auth-card label { display: grid; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: .11em; }
+.auth-card input { width: 100%; border: 1px solid #c9bea8; background: white; padding: 13px 14px; font: inherit; }
+.auth-card form button { border: 0; background: #176149; color: white; padding: 14px; font-weight: 800; cursor: pointer; }
+.auth-card form button:disabled { opacity: .65; cursor: wait; }
+.auth-card > a { display: inline-block; margin-top: 22px; color: #176149; font-weight: 700; }
+.auth-error { color: #9e2e2e; font-size: 13px; font-weight: 700; }
+.auth-notice { margin: 0 0 8px; padding: 14px; background: #e9f2ed; color: #176149; line-height: 1.5; }
+@media (max-width: 520px) { .auth-card { padding: 30px 22px; } }
+
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
 
 /* Panel privado del peluquero */
